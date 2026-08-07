@@ -261,7 +261,7 @@ from utils import read_data
 
 # result = operation_data_breakdown(inventory_file, outbound_file, inbound_file, labor_file)
 
-if "cost_beakdown" not in st.session_state:
+if "cost_breakdown" not in st.session_state:
     st.warning(
         "Warehouse Operation data is not loaded. "
         "Please upload and process the files on the Data Upload page."
@@ -276,7 +276,7 @@ if "cost_beakdown" not in st.session_state:
 
     st.stop()
 
-result = st.session_state["cost_beakdown"].copy()
+result = st.session_state["cost_breakdown"].copy()
 
 result["warehouse_name"] = (
         result["warehouse_code"]
