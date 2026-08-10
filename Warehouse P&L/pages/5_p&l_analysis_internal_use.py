@@ -1329,6 +1329,13 @@ with overview_tab:
                     west_current["Outbound Units"],
                     decimals=0,
                 ),
+                delta=format_mom(
+                                    calculate_summary_mom(
+                                        west_current,
+                                        west_previous,
+                                        "Outbound Units",
+                                    )
+                                ),
             )
 
         with west_volume_col2:
@@ -1338,6 +1345,13 @@ with overview_tab:
                     west_current["Outbound Orders"],
                     decimals=0,
                 ),
+                delta=format_mom(
+                                                    calculate_summary_mom(
+                                                        west_current,
+                                                        west_previous,
+                                                        "Outbound Orders",
+                                                    )
+                                                ),
             )
 
         with west_volume_col3:
@@ -1347,15 +1361,29 @@ with overview_tab:
                     west_current["Working Hours"],
                     decimals=1,
                 ),
+                delta=format_mom(
+                                                                    calculate_summary_mom(
+                                                                        west_current,
+                                                                        west_previous,
+                                                                        "Working Hours",
+                                                                    )
+                                                                ),
             )
 
         with west_volume_col4:
             st.metric(
-                "HC",
+                "c",
                 display_number(
                     west_current["HC"],
                     decimals=1,
                 ),
+                delta=format_mom(
+                                                                                    calculate_summary_mom(
+                                                                                        west_current,
+                                                                                        west_previous,
+                                                                                        "HC",
+                                                                                    )
+                                                                                ),
             )
 
         with west_volume_col5:
@@ -1365,6 +1393,13 @@ with overview_tab:
                     west_current["Labor Cost"],
                     prefix="¥",
                 ),
+                delta=format_mom(
+                                                                                    calculate_summary_mom(
+                                                                                        west_current,
+                                                                                        west_previous,
+                                                                                        "Labor Cost",
+                                                                                    )
+                                                                                ),
             )
 
         st.markdown("---")
