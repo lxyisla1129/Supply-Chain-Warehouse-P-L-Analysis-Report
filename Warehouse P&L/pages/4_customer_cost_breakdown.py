@@ -14,6 +14,7 @@ import streamlit as st
 import plotly.express as px
 from utils import read_data
 
+
 if "cost_breakdown" not in st.session_state:
     st.warning(
         "Warehouse Operation data is not loaded. "
@@ -86,8 +87,8 @@ final_data = final_data[
         "month",
         "warehouse_code",
         "warehouse_name",
-        "owner_no",
-        "owner_name",
+        "customer_code",
+        "customer_name",
         "iv_size_rate",
         "weighted_outbound",
         "weighted_ib_ob",
@@ -138,7 +139,7 @@ final_data["Total Cost"] = (
     .sum(axis=1)
 )
 
-# final_data = final_data[["month", "warehouse_code", "warehouse_name", "owner_no", "owner_name", "Rent Cost Breakdown","Labor Breakdown", "Consumerable Breakdown", "Equipment Breakdown", "Distribution Expense Breakdown", "Daily Expense Related Breakdown", "Depreciation Breakdown", "Total Cost"]].fillna(0).reset_index(drop=True)
+# final_data = final_data[["month", "warehouse_code", "warehouse_name", "customer_code", "customer_name", "Rent Cost Breakdown","Labor Breakdown", "Consumerable Breakdown", "Equipment Breakdown", "Distribution Expense Breakdown", "Daily Expense Related Breakdown", "Depreciation Breakdown", "Total Cost"]].fillna(0).reset_index(drop=True)
 # st.write(final_data.head(20))
 
 final_data = final_data[
@@ -146,8 +147,8 @@ final_data = final_data[
         "month",
         "warehouse_code",
         "warehouse_name",
-        "owner_no",
-        "owner_name",
+        "customer_code",
+        "customer_name",
         *breakdown_columns,
         "Total Cost",
     ]
@@ -167,7 +168,7 @@ warehouse_options = sorted(
 )
 
 customer_options = sorted(
-    final_data["owner_name"]
+    final_data["customer_name"]
     .dropna()
     .unique()
 )
@@ -209,7 +210,7 @@ if selected_warehouses:
 
 if selected_customers:
     filtered_final_data = filtered_final_data[
-        filtered_final_data["owner_name"].isin(selected_customers)
+        filtered_final_data["customer_name"].isin(selected_customers)
     ]
 
 if filtered_final_data.empty:
@@ -264,7 +265,7 @@ with overview_tab:
 
     total_cost = filtered_final_data["Total Cost"].sum()
 
-    customer_count = filtered_final_data["owner_no"].nunique()
+    customer_count = filtered_final_data["customer_code"].nunique()
 
     warehouse_count = filtered_final_data["warehouse_name"].nunique()
 
@@ -329,6 +330,14 @@ with trend_tab:
 
     trend_source = filtered_final_data.copy()
 
+    trend_source = trend_source[
+        ~trend_source["customer_name"]
+        .str.contains(
+            "测试",
+            na=False,
+        )
+        ]
+
     # --------------------------------------------------------
     # Prepare data
     # --------------------------------------------------------
@@ -348,8 +357,8 @@ with trend_tab:
         subset=[
             "month",
             "warehouse_name",
-            "owner_no",
-            "owner_name",
+            "customer_code",
+            "customer_name",
         ]
     )
 
@@ -390,18 +399,18 @@ with trend_tab:
     customer_options_for_trend = (
         warehouse_trend_source[
             [
-                "owner_no",
-                "owner_name",
+                "customer_code",
+                "customer_name",
             ]
         ]
         .drop_duplicates()
-        .sort_values("owner_name")
+        .sort_values("customer_name")
     )
 
     customer_label_mapping = dict(
         zip(
-            customer_options_for_trend["owner_no"].astype(str),
-            customer_options_for_trend["owner_name"].astype(str),
+            customer_options_for_trend["customer_code"].astype(str),
+            customer_options_for_trend["customer_name"].astype(str),
         )
     )
 
@@ -409,7 +418,7 @@ with trend_tab:
         selected_trend_customer = st.selectbox(
             "Select Customer",
             options=customer_options_for_trend[
-                "owner_no"
+                "customer_code"
             ].astype(str).tolist(),
             format_func=lambda customer_code: (
                 customer_label_mapping.get(
@@ -452,7 +461,7 @@ with trend_tab:
     # --------------------------------------------------------
 
     customer_trend_source = warehouse_trend_source[
-        warehouse_trend_source["owner_no"]
+        warehouse_trend_source["customer_code"]
         .astype(str)
         .eq(selected_trend_customer)
     ].copy()
@@ -598,8 +607,8 @@ with trend_tab:
         filtered_final_data
         .groupby(
             [
-                "owner_no",
-                "owner_name",
+                "customer_code",
+                "customer_name",
             ],
             as_index=False
         )[cost_columns + ["Total Cost"]]
@@ -643,7 +652,7 @@ with rank_tab:
     #             ascending=True
     #         ),
     #         x="Total Cost",
-    #         y="owner_name",
+    #         y="customer_name",
     #         orientation="h",
     #         title=f"Top {top_n} Customers by Allocated Cost"
     #     )
@@ -721,7 +730,7 @@ with rank_tab:
 
     #     px.treemap(
     #     top_customers,
-    #     path=["owner_name"],
+    #     path=["customer_name"],
     #     values="Total Cost",
     # )
     # with chart_col2:
@@ -729,11 +738,11 @@ with rank_tab:
 
     treemap_chart = px.treemap(
             top_customers,
-            path=["owner_name"],
+            path=["customer_name"],
             values="Total Cost",
             title=f"Top {top_n} Customer Cost Composition",
             custom_data=[
-                "owner_no",
+                "customer_code",
                 "Total Cost",
             ],
         )
@@ -793,8 +802,8 @@ with breakdown_tab:
 
     breakdown_long = breakdown_data.melt(
         id_vars=[
-            "owner_no",
-            "owner_name",
+            "customer_code",
+            "customer_name",
         ],
         value_vars=cost_columns,
         var_name="Cost Category",
@@ -812,7 +821,7 @@ with breakdown_tab:
 
     stacked_chart = px.bar(
         breakdown_long,
-        x="owner_name",
+        x="customer_name",
         y="Allocated Cost",
         color="Cost Category",
         title="Allocated Cost by Customer and Cost Category",
@@ -859,8 +868,8 @@ with breakdown_tab:
 
     percentage_long = customer_percentage_data.melt(
         id_vars=[
-            "owner_no",
-            "owner_name",
+            "customer_code",
+            "customer_name",
         ],
         value_vars=cost_columns,
         var_name="Cost Category",
@@ -874,7 +883,7 @@ with breakdown_tab:
 
     percentage_chart = px.bar(
         percentage_long,
-        x="owner_name",
+        x="customer_name",
         y="Cost Percentage",
         color="Cost Category",
         barmode="stack",
@@ -916,8 +925,8 @@ with detail_tab:
             [
                 "month",
                 "warehouse_name",
-                "owner_no",
-                "owner_name",
+                "customer_code",
+                "customer_name",
             ],
             as_index=False
         )[cost_columns + ["Total Cost"]]
@@ -932,8 +941,8 @@ with detail_tab:
         columns={
             "month": "月份 Month",
             "warehouse_name": "仓库 Warehouse",
-            "owner_no": "客户代码 Customer Code",
-            "owner_name": "客户名称 Customer Name",
+            "customer_code": "客户代码 Customer Code",
+            "customer_name": "客户名称 Customer Name",
             **cost_name_mapping,
             "Total Cost": "总分摊成本 Total Allocated Cost",
         }
