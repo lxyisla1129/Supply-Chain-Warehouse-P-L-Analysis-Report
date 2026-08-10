@@ -31,6 +31,16 @@ if "customer_profit" not in st.session_state:
 
 customer_profit = st.session_state["customer_profit"].copy()
 
+outbound_data = (
+    st.session_state["outbound_data"]
+    .copy()
+)
+
+inbound_data = (
+    st.session_state["inbound_data"]
+    .copy()
+)
+
 filter_col1, filter_col2, filter_col3 = st.columns(3)
 
 month_options = sorted(
@@ -403,6 +413,82 @@ with customer_tab:
     )
 
 with monthly_tab:
+
+    inbound_summary = (
+        inbound_data
+        .groupby(
+            [
+                "month",
+                "warehouse_code",
+                "customer_code",
+            ],
+            as_index=False
+        )
+        .agg(
+            inbound_units=("units", "sum")
+        )
+        .rename(
+            columns={
+                "month": "Month",
+                # "owner_no": "customer_code",
+            }
+        )
+    )
+
+    # st.write(inbound_summary.head(20))
+    # st.stop()
+
+    outbound_summary = (
+        outbound_data
+        .groupby(
+            [
+                "month",
+                "warehouse_code",
+                "customer_code",
+            ],
+            as_index=False
+        )
+        .agg(
+            outbound_units=("units", "sum"),
+            outbound_orders=("order_num", "sum"),
+        )
+        .rename(
+            columns={
+                "month": "Month",
+                # "owner_no": "customer_code",
+            }
+        )
+    )
+
+    inbound_summary["Month"] = pd.to_datetime(
+    inbound_summary["Month"]).dt.to_period("M").dt.to_timestamp()
+
+    outbound_summary["Month"] = pd.to_datetime(
+    outbound_summary["Month"]).dt.to_period("M").dt.to_timestamp()
+
+    filtered_customer_profit = filtered_customer_profit.merge(
+            inbound_summary,
+            on=[
+                "Month",
+                "warehouse_code",
+                "customer_code",
+            ],
+            how="left"
+        )
+
+    # st.write(filtered_customer_profit.head())
+    # st.stop()
+    
+    filtered_customer_profit = filtered_customer_profit.merge(
+            outbound_summary,
+            on=[
+                "Month",
+                "warehouse_code",
+                "customer_code",
+            ],
+            how="left"
+        )
+
     monthly_customer_table = (
         filtered_customer_profit
         .rename(
@@ -415,6 +501,9 @@ with monthly_tab:
                 "Cost": "成本 Cost",
                 "Profit": "利润 Profit",
                 "Margin": "利润率 Margin",
+                "inbound_units": "入库件数 Inbound Units",
+                "outbound_units": "出库件数 Outbound Units",
+                "outbound_orders": "出库单量 Outbound Orders",
             }
         )
         [
@@ -427,6 +516,9 @@ with monthly_tab:
                 "成本 Cost",
                 "利润 Profit",
                 "利润率 Margin",
+                "入库件数 Inbound Units",
+                "出库件数 Outbound Units",
+                "出库单量 Outbound Orders",
             ]
         ]
         .sort_values(
@@ -437,24 +529,55 @@ with monthly_tab:
                 
             ],
             ascending=[
-                True,
+                False,
                 True,
                 True,
             ]
         )
     )
+
+    group_columns = [
+        "仓库 Warehouse",
+        "客户编码 Customer Code",
+    ]
     
     monthly_customer_table["上月成本 Previous Month Cost"] = (
-        monthly_customer_table.groupby(
-            ["仓库 Warehouse",
-             "客户编码 Customer Code",
-            ]
-        )
+        monthly_customer_table.groupby(group_columns)
         ["成本 Cost"]
         .shift(1)
     )
+
+    monthly_customer_table[
+        "上月入库 Previous Inbound"
+    ] = (
+        monthly_customer_table
+        .groupby(group_columns)[
+            "入库件数 Inbound Units"
+        ]
+        .shift(1)
+    )
+
+    monthly_customer_table[
+        "上月出库 Previous Outbound"
+    ] = (
+        monthly_customer_table
+        .groupby(group_columns)[
+            "出库件数 Outbound Units"
+        ]
+        .shift(1)
+    )
+
+    monthly_customer_table[
+        "上月订单 Previous Orders"
+    ] = (
+        monthly_customer_table
+        .groupby(group_columns)[
+            "出库单量 Outbound Orders"
+        ]
+        .shift(1)
+    )
     
-    monthly_customer_table["MoM"] = monthly_customer_table.apply(
+    monthly_customer_table["成本 Cost MoM"] = monthly_customer_table.apply(
         lambda row: calculate_mom(
             row["成本 Cost"],
             row["上月成本 Previous Month Cost"]
@@ -462,12 +585,48 @@ with monthly_tab:
         axis=1
     )
 
+    monthly_customer_table["入库 IB Unit MoM"] = (
+        monthly_customer_table.apply(
+            lambda row: calculate_mom(
+                row["入库件数 Inbound Units"],
+                row["上月入库 Previous Inbound"]
+            ),
+            axis=1
+        )
+    )
+
+    monthly_customer_table["出库 OB Unit MoM"] = (
+        monthly_customer_table.apply(
+            lambda row: calculate_mom(
+                row["出库件数 Outbound Units"],
+                row["上月出库 Previous Outbound"]
+            ),
+            axis=1
+        )
+    )
+
+    monthly_customer_table["订单 OB Order MoM"] = (
+        monthly_customer_table.apply(
+            lambda row: calculate_mom(
+                row["出库单量 Outbound Orders"],
+                row["上月订单 Previous Orders"]
+            ),
+            axis=1
+        )
+    )
+
+    monthly_customer_table = monthly_customer_table.fillna(0)
+
     styled_df = (
     monthly_customer_table
     .style
     .map(
         highlight_profit,
-        subset=["利润 Profit", "利润率 Margin", "MoM"]
+        subset=["利润 Profit", "利润率 Margin", "成本 Cost MoM",
+                            "入库 IB Unit MoM",
+                            "出库 OB Unit MoM",
+                            "订单 OB Order MoM"
+                            ]
     )
     .format(
         {
@@ -476,27 +635,66 @@ with monthly_tab:
             "利润 Profit": "¥{:,.0f}",
             "利润率 Margin": "{:.1%}",
             "上月成本 Previous Month Cost": "¥{:,.0f}",
-            "MoM": "{:.1%}",
+            "上月入库 Previous Inbound": "{:,.0f}",
+            "上月出库 Previous Outbound": "{:,.0f}",
+            "上月订单 Previous Orders": "{:,.0f}",
+            "入库件数 Inbound Units": "{:,.0f}",
+            "出库件数 Outbound Units": "{:,.0f}",
+            "出库单量 Outbound Orders": "{:,.0f}",
+            "平均每单件数 Units / Order": "{:,.2f}",
+            
+            "成本 Cost MoM": "{:.1%}",
+            "入库 IB Unit MoM": "{:.1%}",
+            "出库 OB Unit MoM": "{:.1%}",
+            "订单 OB Order MoM": "{:.1%}",
         },
         na_rep="-"
     )
     )
 
     st.dataframe(
-        styled_df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "月份 Month": st.column_config.DateColumn(
-                "月份 Month",
-                format="YYYY-MM"
-            ),
+    styled_df,
+    use_container_width=True,
+    hide_index=True,
+    height=650,
+    column_config={
+        "月份 Month": st.column_config.DateColumn(
+            "月份 Month",
+            format="YYYY-MM",
+        ),
+        "成本 Cost MoM": st.column_config.NumberColumn(
+            "成本 Cost MoM",
+            format="percent",
+        ),
+        "入库 IB Unit MoM": st.column_config.NumberColumn(
+            "入库 IB Unit MoM",
+            format="percent",
+        ),
+        "出库 OB Unit MoM": st.column_config.NumberColumn(
+            "出库 OB Unit MoM",
+            format="percent",
+        ),
+        "订单 OB Order MoM": st.column_config.NumberColumn(
+            "订单 OB Order MoM",
+            format="percent",
+        ),
+    },
+    )
+    # st.dataframe(
+    #     styled_df,
+    #     use_container_width=True,
+    #     hide_index=True,
+    #     column_config={
+    #         "月份 Month": st.column_config.DateColumn(
+    #             "月份 Month",
+    #             format="YYYY-MM"
+    #         ),
 
-            "MoM": st.column_config.NumberColumn(
-                "MoM",
-                format="%.1f%%",
-                width="small",
-            ),
+            # "MoM": st.column_config.NumberColumn(
+            #     "MoM",
+            #     format="%.1f%%",
+            #     width="small",
+            # ),
             # "收入 Revenue": st.column_config.NumberColumn(
             #     "收入 Revenue",
             #     format="¥%,.0f"
@@ -521,8 +719,8 @@ with monthly_tab:
             #     "MoM",
             #     format="%.1f%%"
             # ),
-        }
-    )
+    #     }
+    # )
 
 with exception_tab:
     exception_data = monthly_customer_table[
