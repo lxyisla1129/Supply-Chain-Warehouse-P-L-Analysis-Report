@@ -790,7 +790,7 @@ with tab3:
             ),
             "MoM": st.column_config.NumberColumn(
                 "MoM",
-                format="%.1f%%",
+                # format="%.1f%%",
                 width="small",
             ),
             # "成本 Cost": st.column_config.NumberColumn(
