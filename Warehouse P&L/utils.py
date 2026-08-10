@@ -53,7 +53,7 @@ def calculate_mom(current_value, previous_value):
     ):
         return None
 
-    return current_value / abs(previous_value) - 1
+    return (current_value - previous_value) / abs(previous_value)
 
 def format_mom(value):
     if value is None or pd.isna(value):
