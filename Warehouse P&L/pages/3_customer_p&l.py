@@ -541,9 +541,9 @@ with monthly_tab:
         "客户编码 Customer Code",
     ]
     
-    monthly_customer_table["上月利益 Previous Month Profit"] = (
+    monthly_customer_table["上月利润 Previous Month Profit"] = (
         monthly_customer_table.groupby(group_columns)
-        ["利益 Profit"]
+        ["利润 Profit"]
         .shift(1)
     )
 
@@ -577,10 +577,10 @@ with monthly_tab:
         .shift(1)
     )
     
-    monthly_customer_table["利益 Profit MoM"] = monthly_customer_table.apply(
+    monthly_customer_table["利润 Profit MoM"] = monthly_customer_table.apply(
         lambda row: calculate_mom(
-            row["利益 Profit"],
-            row["上月利益 Previous Month Profit"]
+            row["利润 Profit"],
+            row["上月利润 Previous Month Profit"]
         ),
         axis=1
     )
@@ -622,7 +622,7 @@ with monthly_tab:
     .style
     .map(
         highlight_profit,
-        subset=["利润 Profit", "利润率 Margin", "利益 Profit MoM",
+        subset=["利润 Profit", "利润率 Margin", "利润 Profit MoM",
                             "入库 IB Unit MoM",
                             "出库 OB Unit MoM",
                             "订单 OB Order MoM"
@@ -634,7 +634,7 @@ with monthly_tab:
             "成本 Cost": "¥{:,.0f}",
             "利润 Profit": "¥{:,.0f}",
             "利润率 Margin": "{:.1%}",
-            "上月利益 Previous Month Profit": "¥{:,.0f}",
+            "上月利润 Previous Month Profit": "¥{:,.0f}",
             "上月入库 Previous Inbound": "{:,.0f}",
             "上月出库 Previous Outbound": "{:,.0f}",
             "上月订单 Previous Orders": "{:,.0f}",
@@ -643,7 +643,7 @@ with monthly_tab:
             "出库单量 Outbound Orders": "{:,.0f}",
             "平均每单件数 Units / Order": "{:,.2f}",
             
-            "利益 Profit MoM": "{:.1%}",
+            "利润 Profit MoM": "{:.1%}",
             "入库 IB Unit MoM": "{:.1%}",
             "出库 OB Unit MoM": "{:.1%}",
             "订单 OB Order MoM": "{:.1%}",
@@ -662,8 +662,8 @@ with monthly_tab:
             "月份 Month",
             format="YYYY-MM",
         ),
-        "利益 Profit MoM": st.column_config.NumberColumn(
-            "利益 Profit MoM",
+        "利润 Profit MoM": st.column_config.NumberColumn(
+            "利润 Profit MoM",
             format="percent",
         ),
         "入库 IB Unit MoM": st.column_config.NumberColumn(
