@@ -23,6 +23,28 @@ def highlight_profit(value):
 
     return ""
 
+def highlight_cost_mom(value):
+    if pd.isna(value):
+        return ""
+
+    # Cost increased → bad
+    if value > 0:
+        return (
+            "background-color: #f4cccc;"
+            "color: #990000;"
+            "font-weight: bold;"
+        )
+
+    # Cost decreased → good
+    if value < 0:
+        return (
+            "background-color: #d9ead3;"
+            "color: #274e13;"
+            "font-weight: bold;"
+        )
+
+    return ""
+
 def calculate_mom(current_value, previous_value):
     if (
         pd.isna(current_value)

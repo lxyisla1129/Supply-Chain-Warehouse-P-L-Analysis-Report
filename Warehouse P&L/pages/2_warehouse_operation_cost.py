@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from utils import calculate_mom, highlight_profit, WAREHOUSE_NAME_MAPPING
+from utils import calculate_mom, highlight_profit, WAREHOUSE_NAME_MAPPING, highlight_cost_mom
 from st_aggrid import AgGrid, GridOptionsBuilder
 
 
@@ -766,7 +766,7 @@ with tab3:
     monthly_table
     .style
     .map(
-        highlight_profit,
+        highlight_cost_mom,
         subset=["MoM"]
     )
     .format(
@@ -776,7 +776,8 @@ with tab3:
             "MoM": "{:.1%}",
         },
         na_rep="-"
-    )
+    ),
+
     )
 
     st.dataframe(

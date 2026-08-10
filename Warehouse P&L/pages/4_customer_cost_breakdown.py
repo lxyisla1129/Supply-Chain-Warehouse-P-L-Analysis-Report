@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import calculate_mom, highlight_profit, WAREHOUSE_NAME_MAPPING, WAREHOUSE_MAPPING
+from utils import calculate_mom, highlight_profit, WAREHOUSE_NAME_MAPPING, WAREHOUSE_MAPPING,highlight_cost_mom
 
 st.set_page_config(
     page_title="Customer Cost Breakdown",
@@ -995,7 +995,7 @@ with detail_tab:
 
     st.dataframe(
     detail_table.style.map(
-        highlight_profit,
+        highlight_cost_mom,
         subset=["MoM"]
     ).format(
         {
