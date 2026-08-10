@@ -1368,11 +1368,12 @@ with overview_tab:
                                                                         "Working Hours",
                                                                     )
                                                                 ),
+                                                                delta_color="inverse",
             )
 
         with west_volume_col4:
             st.metric(
-                "Hc",
+                "HC",
                 display_number(
                     west_current["HC"],
                     decimals=1,
@@ -1384,6 +1385,7 @@ with overview_tab:
                                                                                         "HC",
                                                                                     )
                                                                                 ),
+                                                                                delta_color="inverse",
             )
 
         with west_volume_col5:
@@ -1400,6 +1402,7 @@ with overview_tab:
                                                                                         "Labor Cost",
                                                                                     )
                                                                                 ),
+                                                                                delta_color="inverse",
             )
 
         st.markdown("---")
@@ -1548,6 +1551,13 @@ with overview_tab:
                             ],
                             decimals=0,
                         ),
+                        delta=format_mom(
+                                                    calculate_summary_mom(
+                                                        warehouse_current,
+                                                        warehouse_previous,
+                                                        "Outbound Units",
+                                                    )
+                                                ),
                     )
 
                 with volume_col2:
@@ -1559,6 +1569,13 @@ with overview_tab:
                             ],
                             decimals=0,
                         ),
+                        delta=format_mom(
+                                                                            calculate_summary_mom(
+                                                                                warehouse_current,
+                                                                                warehouse_previous,
+                                                                                "Outbound Orders",
+                                                                            )
+                                                                        ),
                     )
 
                 with volume_col3:
@@ -1570,6 +1587,14 @@ with overview_tab:
                             ],
                             decimals=1,
                         ),
+                        delta=format_mom(
+                                                                                                    calculate_summary_mom(
+                                                                                                        warehouse_current,
+                                                                                                        warehouse_previous,
+                                                                                                        "Working Hours",
+                                                                                                    )
+                                                                                                ),
+                                                                                                delta_color="inverse",
                     )
 
                 with volume_col4:
@@ -1579,6 +1604,14 @@ with overview_tab:
                             warehouse_current["HC"],
                             decimals=1,
                         ),
+                        delta=format_mom(
+                                                                                                                            calculate_summary_mom(
+                                                                                                                                warehouse_current,
+                                                                                                                                warehouse_previous,
+                                                                                                                                "HC",
+                                                                                                                            )
+                                                                                                                        ),
+                                                                                                                        delta_color="inverse",
                     )
 
                 with volume_col5:
@@ -1590,6 +1623,14 @@ with overview_tab:
                             ],
                             prefix="¥",
                         ),
+                        delta=format_mom(
+                                                                                                                                                    calculate_summary_mom(
+                                                                                                                                                        warehouse_current,
+                                                                                                                                                        warehouse_previous,
+                                                                                                                                                        "Labor Cost",
+                                                                                                                                                    )
+                                                                                                                                                ),
+                                                                                                                                                delta_color="inverse",
                     )
 
 
