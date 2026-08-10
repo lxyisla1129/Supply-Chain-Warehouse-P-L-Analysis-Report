@@ -1372,7 +1372,7 @@ with overview_tab:
 
         with west_volume_col4:
             st.metric(
-                "c",
+                "Hc",
                 display_number(
                     west_current["HC"],
                     decimals=1,
