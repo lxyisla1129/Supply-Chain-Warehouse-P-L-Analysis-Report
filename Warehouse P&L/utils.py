@@ -398,7 +398,7 @@ def operation_data_breakdown(inventory_file, outbound_file, inbound_file, labor_
         on=[
             "month",
             "warehouse_code",
-            "owner_no",
+            "customer_code",
         ],
         how="left")
     
@@ -408,11 +408,11 @@ def operation_data_breakdown(inventory_file, outbound_file, inbound_file, labor_
         on=[
             "month",
             "warehouse_code",
-            "owner_no",
+            "customer_code",
         ],
         how="left")
     
-    operation_data = operation_data.drop(columns=["owner_name_y", "owner_name"], errors="coerce")
+    operation_data = operation_data.drop(columns=["customer_name_y", "customer_name"], errors="coerce")
 
     operation_data = (
         operation_data
@@ -420,7 +420,7 @@ def operation_data_breakdown(inventory_file, outbound_file, inbound_file, labor_
     )
 
     operation_data = operation_data.rename(columns ={ 
-        "owner_name_x": "owner_name",
+        "customer_name_x": "customer_name",
         "volumn_x": "volumn_iv",
         "sku_x": "sku_iv",
         "units_x": "units_iv",
@@ -517,7 +517,7 @@ def operation_data_breakdown(inventory_file, outbound_file, inbound_file, labor_
     result["Total HC"] = result["Inventory HC Allocated"] + result["Outbound HC Allocated"] + result["Inbound HC Allocated"]
     result["hc_ratio"] = calc_share(result, "Total HC")
 
-    result = result.sort_values(by = ['month', 'warehouse_code','owner_name'], ascending = True).reset_index(drop=True)
+    result = result.sort_values(by = ['month', 'warehouse_code','customer_name'], ascending = True).reset_index(drop=True)
 
     # st.write(result.head(20))
 
