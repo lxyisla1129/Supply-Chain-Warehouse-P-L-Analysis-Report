@@ -541,9 +541,9 @@ with monthly_tab:
         "客户编码 Customer Code",
     ]
     
-    monthly_customer_table["上月成本 Previous Month Cost"] = (
+    monthly_customer_table["上月利益 Previous Month Profit"] = (
         monthly_customer_table.groupby(group_columns)
-        ["成本 Cost"]
+        ["利益 Profit"]
         .shift(1)
     )
 
@@ -577,10 +577,10 @@ with monthly_tab:
         .shift(1)
     )
     
-    monthly_customer_table["成本 Cost MoM"] = monthly_customer_table.apply(
+    monthly_customer_table["利益 Profit MoM"] = monthly_customer_table.apply(
         lambda row: calculate_mom(
-            row["成本 Cost"],
-            row["上月成本 Previous Month Cost"]
+            row["利益 Profit"],
+            row["上月利益 Previous Month Profit"]
         ),
         axis=1
     )
@@ -622,7 +622,7 @@ with monthly_tab:
     .style
     .map(
         highlight_profit,
-        subset=["利润 Profit", "利润率 Margin", "成本 Cost MoM",
+        subset=["利润 Profit", "利润率 Margin", "利益 Profit MoM",
                             "入库 IB Unit MoM",
                             "出库 OB Unit MoM",
                             "订单 OB Order MoM"
@@ -634,7 +634,7 @@ with monthly_tab:
             "成本 Cost": "¥{:,.0f}",
             "利润 Profit": "¥{:,.0f}",
             "利润率 Margin": "{:.1%}",
-            "上月成本 Previous Month Cost": "¥{:,.0f}",
+            "上月利益 Previous Month Profit": "¥{:,.0f}",
             "上月入库 Previous Inbound": "{:,.0f}",
             "上月出库 Previous Outbound": "{:,.0f}",
             "上月订单 Previous Orders": "{:,.0f}",
@@ -643,7 +643,7 @@ with monthly_tab:
             "出库单量 Outbound Orders": "{:,.0f}",
             "平均每单件数 Units / Order": "{:,.2f}",
             
-            "成本 Cost MoM": "{:.1%}",
+            "利益 Profit MoM": "{:.1%}",
             "入库 IB Unit MoM": "{:.1%}",
             "出库 OB Unit MoM": "{:.1%}",
             "订单 OB Order MoM": "{:.1%}",
@@ -662,8 +662,8 @@ with monthly_tab:
             "月份 Month",
             format="YYYY-MM",
         ),
-        "成本 Cost MoM": st.column_config.NumberColumn(
-            "成本 Cost MoM",
+        "利益 Profit MoM": st.column_config.NumberColumn(
+            "利益 Profit MoM",
             format="percent",
         ),
         "入库 IB Unit MoM": st.column_config.NumberColumn(
@@ -680,47 +680,6 @@ with monthly_tab:
         ),
     },
     )
-    # st.dataframe(
-    #     styled_df,
-    #     use_container_width=True,
-    #     hide_index=True,
-    #     column_config={
-    #         "月份 Month": st.column_config.DateColumn(
-    #             "月份 Month",
-    #             format="YYYY-MM"
-    #         ),
-
-            # "MoM": st.column_config.NumberColumn(
-            #     "MoM",
-            #     format="%.1f%%",
-            #     width="small",
-            # ),
-            # "收入 Revenue": st.column_config.NumberColumn(
-            #     "收入 Revenue",
-            #     format="¥%,.0f"
-            # ),
-            # "成本 Cost": st.column_config.NumberColumn(
-            #     "成本 Cost",
-            #     format="¥%,.0f"
-            # ),
-            # "利润 Profit": st.column_config.NumberColumn(
-            #     "利润 Profit",
-            #     format="¥%,.0f"
-            # ),
-            # "利润率 Margin": st.column_config.NumberColumn(
-            #     "利润率 Margin",
-            #     format="%.1f%%"
-            # ),
-            # "上月成本 Previous Month Cost": st.column_config.NumberColumn(
-            #     "上月成本 Previous Month Cost",
-            #     format="¥%,.0f"
-            # ),
-            # "MoM": st.column_config.NumberColumn(
-            #     "MoM",
-            #     format="%.1f%%"
-            # ),
-    #     }
-    # )
 
 with exception_tab:
     exception_data = monthly_customer_table[
