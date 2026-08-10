@@ -529,7 +529,7 @@ with monthly_tab:
                 
             ],
             ascending=[
-                False,
+                True,
                 True,
                 True,
             ]
