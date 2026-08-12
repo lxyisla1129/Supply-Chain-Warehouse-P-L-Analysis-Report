@@ -246,7 +246,7 @@ with chart_tab:
                 },
                 title=(
                     f"Top {len(top_loss_df)} "
-                    "Profitable Customers"
+                    "Loss Customers"
                 ),
                 labels={
                     "customer_name": "Customer",
