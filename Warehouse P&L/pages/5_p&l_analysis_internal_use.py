@@ -835,10 +835,10 @@ analysis_data["Labor Cost / Revenue"] = safe_divide(
     analysis_data["Revenue"],
 )
 
-analysis_data["Sell-through Rate"] = safe_divide(
-    analysis_data["outbound_units"],
-    analysis_data["inventory_units"],
-)
+# analysis_data["Sell-through Rate"] = safe_divide(
+#     analysis_data["outbound_units"],
+#     analysis_data["inventory_units"],
+# )
 
 analysis_data["Revenue per Unit"] = safe_divide(
     analysis_data["Revenue"],
@@ -903,7 +903,7 @@ mom_kpi_columns = [
     "Cost per Order",
     "UPPH",
     "Labor Cost / Revenue",
-    "Sell-through Rate",
+    # "Sell-through Rate",
     "outbound_units",
     "outbound_orders",
     "inbound_units",
@@ -1010,11 +1010,11 @@ def calculate_summary_kpis(dataframe):
             else np.nan
         ),
 
-        "Sell-through Rate": (
-            outbound_units / inventory_units
-            if inventory_units != 0
-            else np.nan
-        ),
+        # "Sell-through Rate": (
+        #     outbound_units / inventory_units
+        #     if inventory_units != 0
+        #     else np.nan
+        # ),
 
         "Gross Margin": (
             profit / revenue
@@ -1119,7 +1119,7 @@ kpi_options = {
     "Cost per Order": "Cost per Order",
     "UPPH": "UPPH",
     "Labor Cost / Revenue": "Labor Cost / Revenue",
-    "Sell-through Rate": "Sell-through Rate",
+    # "Sell-through Rate": "Sell-through Rate",
     "Labor Cost per Unit": "Labor Cost per Unit",
     "Gross Margin": "Gross Margin",
     "OT Rate": "OT Rate",
@@ -1127,7 +1127,7 @@ kpi_options = {
 
 percentage_kpis = [
     "Labor Cost / Revenue",
-    "Sell-through Rate",
+    # "Sell-through Rate",
     "Gross Margin",
     "OT Rate",
 ]
@@ -1231,8 +1231,8 @@ with overview_tab:
             else None
         )
 
-        west_col1, west_col2, west_col3, west_col4, west_col5 = (
-            st.columns(5)
+        west_col1, west_col2, west_col3, west_col4 = (
+            st.columns(4)
         )
 
         with west_col1:
@@ -1302,22 +1302,22 @@ with overview_tab:
                 delta_color="inverse",
             )
 
-        with west_col5:
-            st.metric(
-                "Sell-through Rate",
-                display_percentage(
-                    west_current[
-                        "Sell-through Rate"
-                    ]
-                ),
-                delta=format_mom(
-                    calculate_summary_mom(
-                        west_current,
-                        west_previous,
-                        "Sell-through Rate",
-                    )
-                ),
-            )
+        # with west_col5:
+        #     st.metric(
+        #         "Sell-through Rate",
+        #         display_percentage(
+        #             west_current[
+        #                 "Sell-through Rate"
+        #             ]
+        #         ),
+        #         delta=format_mom(
+        #             calculate_summary_mom(
+        #                 west_current,
+        #                 west_previous,
+        #                 "Sell-through Rate",
+        #             )
+        #         ),
+        #     )
 
         west_volume_col1, west_volume_col2, west_volume_col3, \
             west_volume_col4, west_volume_col5 = st.columns(5)
@@ -1447,8 +1447,8 @@ with overview_tab:
             with st.container(border=True):
                 st.markdown(f"### {warehouse}")
 
-                col1, col2, col3, col4, col5 = (
-                    st.columns(5)
+                col1, col2, col3, col4 = (
+                    st.columns(4)
                 )
 
                 with col1:
@@ -1522,22 +1522,22 @@ with overview_tab:
                         delta_color="inverse",
                     )
 
-                with col5:
-                    st.metric(
-                        "Sell-through Rate",
-                        display_percentage(
-                            warehouse_current[
-                                "Sell-through Rate"
-                            ]
-                        ),
-                        delta=format_mom(
-                            calculate_summary_mom(
-                                warehouse_current,
-                                warehouse_previous,
-                                "Sell-through Rate",
-                            )
-                        ),
-                    )
+                # with col5:
+                #     st.metric(
+                #         "Sell-through Rate",
+                #         display_percentage(
+                #             warehouse_current[
+                #                 "Sell-through Rate"
+                #             ]
+                #         ),
+                #         delta=format_mom(
+                #             calculate_summary_mom(
+                #                 warehouse_current,
+                #                 warehouse_previous,
+                #                 "Sell-through Rate",
+                #             )
+                #         ),
+                #     )
 
                 volume_col1, volume_col2, volume_col3, \
                     volume_col4, volume_col5 = st.columns(5)
@@ -2001,8 +2001,8 @@ with detail_tab:
         "UPPH MoM",
         "Labor Cost / Revenue",
         "Labor Cost / Revenue MoM",
-        "Sell-through Rate",
-        "Sell-through Rate MoM",
+        # "Sell-through Rate",
+        # "Sell-through Rate MoM",
         "Labor Cost per Unit",
         "Gross Margin",
         "OT Rate",
@@ -2052,14 +2052,14 @@ with detail_tab:
 
     percentage_columns = [
         "Labor Cost / Revenue",
-        "Sell-through Rate",
+        # "Sell-through Rate",
         "Gross Margin",
         "OT Rate",
         "Cost per Unit MoM",
         "Cost per Order MoM",
         "UPPH MoM",
         "Labor Cost / Revenue MoM",
-        "Sell-through Rate MoM",
+        # "Sell-through Rate MoM",
     ]
 
     integer_columns = [
