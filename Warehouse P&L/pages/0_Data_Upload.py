@@ -97,7 +97,7 @@ with warehouse_tab:
 with customer_tab:
     st.subheader("Customer Income & Cost Files")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
     with col1:
         cost_file = st.file_uploader(
@@ -120,6 +120,20 @@ with customer_tab:
             key="customer_mapping_file",
         )
 
+    with col4:
+        outbound_file = st.file_uploader(
+            "Upload outbound File",
+            type=["csv", "xlsx", "xls"],
+            key="outbound_file"
+            )
+    
+    with col5:
+        inbound_file = st.file_uploader(
+            "Upload inbound File",
+            type=["csv", "xlsx", "xls"],
+            key="inbound_file"
+            )
+
     if st.button(
         "Process Customer P&L Data",
         type="primary",
@@ -131,6 +145,8 @@ with customer_tab:
                 cost_file,
                 income_file,
                 mapping_file,
+                outbound_file,
+                inbound_file
             ]
         ):
             with st.spinner("Processing Customer P&L data..."):
@@ -143,6 +159,14 @@ with customer_tab:
                 st.session_state["customer_profit"] = (
                     customer_profit
                 )
+
+                outbound_data = read_data(
+                                    outbound_file
+                                )
+                
+                inbound_data = read_data(
+                                    inbound_file
+                                )
 
             st.success("Customer Profit data is ready.")
 
