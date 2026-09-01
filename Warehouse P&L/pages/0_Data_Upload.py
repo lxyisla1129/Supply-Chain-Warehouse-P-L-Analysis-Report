@@ -163,9 +163,16 @@ with customer_tab:
                 outbound_data = read_data(
                                     outbound_file
                                 )
+
+                st.session_state["outbound_data"] = (
+                    outbound_data
+                )
                 
                 inbound_data = read_data(
                                     inbound_file
+                                )
+                st.session_state["inbound_data"] = (
+                    inbound_data
                                 )
 
             st.success("Customer Profit data is ready.")
