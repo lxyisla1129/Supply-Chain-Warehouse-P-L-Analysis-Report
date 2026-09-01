@@ -124,14 +124,14 @@ with customer_tab:
         outbound_file = st.file_uploader(
             "Upload outbound File",
             type=["csv", "xlsx", "xls"],
-            key="outbound_file"
+            key="outbound_file_1"
             )
     
     with col5:
         inbound_file = st.file_uploader(
             "Upload inbound File",
             type=["csv", "xlsx", "xls"],
-            key="inbound_file"
+            key="inbound_file_1"
             )
 
     if st.button(
