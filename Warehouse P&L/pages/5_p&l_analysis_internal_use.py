@@ -2123,3 +2123,267 @@ with detail_tab:
         file_name="pnl_analysis.csv",
         mime="text/csv",
     )
+
+# ============================================================
+# DETAIL TABLE
+# ============================================================
+
+with detail_tab:
+    st.subheader("P&L Analysis Detail")
+
+    detail_columns = [
+        "month",
+        "warehouse_code",
+        "warehouse_name",
+        "Revenue",
+        "Total Cost",
+        "Profit",
+        "inventory_units",
+        "inbound_units",
+        "outbound_units",
+        "outbound_orders",
+        "regular_hours",
+        "Working Hours",
+        "Labor Cost",
+        "HC",
+        "OT Hours",
+        "Cost per Unit",
+        "Cost per Unit MoM",
+        "Cost per Order",
+        "Cost per Order MoM",
+        "UPPH",
+        "UPPH MoM",
+        "Labor Cost / Revenue",
+        "Labor Cost / Revenue MoM",
+        "Sell-through Rate",
+        "Sell-through Rate MoM",
+        "Labor Cost per Unit",
+        "Gross Margin",
+        "OT Rate",
+    ]
+
+    detail_columns = [
+        column
+        for column in detail_columns
+        if column in filtered_data.columns
+    ]
+
+    detail_table = (
+        filtered_data[detail_columns]
+        .sort_values(
+            [
+                "month",
+                "warehouse_name",
+            ],
+            ascending=[
+                False,
+                True,
+            ],
+        )
+        .rename(
+            columns={
+                "month": "Month",
+                "warehouse_code": "Warehouse Code",
+                "warehouse_name": "Warehouse",
+                "inventory_units": "Inventory Units",
+                "inbound_units": "Inbound Units",
+                "outbound_units": "Outbound Units",
+                "outbound_orders": "Outbound Orders",
+                "regular_hours": "Regular Hours",
+            }
+        )
+    )
+
+    currency_columns = [
+        "Revenue",
+        "Total Cost",
+        "Profit",
+        "Labor Cost",
+        "Cost per Unit",
+        "Cost per Order",
+        "Labor Cost per Unit",
+    ]
+
+    percentage_columns = [
+        "Labor Cost / Revenue",
+        "Sell-through Rate",
+        "Gross Margin",
+        "OT Rate",
+        "Cost per Unit MoM",
+        "Cost per Order MoM",
+        "UPPH MoM",
+        "Labor Cost / Revenue MoM",
+        "Sell-through Rate MoM",
+    ]
+
+    integer_columns = [
+        "Inventory Units",
+        "Inbound Units",
+        "Outbound Units",
+        "Outbound Orders",
+    ]
+
+    formatting = {
+        column: "¥{:,.2f}"
+        for column in currency_columns
+        if column in detail_table.columns
+    }
+
+    formatting.update(
+        {
+            column: "{:.1%}"
+            for column in percentage_columns
+            if column in detail_table.columns
+        }
+    )
+
+    formatting.update(
+        {
+            column: "{:,.0f}"
+            for column in integer_columns
+            if column in detail_table.columns
+        }
+    )
+
+    for column in [
+        "Regular Hours",
+        "Working Hours",
+        "OT Hours",
+        "HC",
+    ]:
+        if column in detail_table.columns:
+            formatting[column] = "{:,.1f}"
+
+    if "UPPH" in detail_table.columns:
+        formatting["UPPH"] = "{:,.2f}"
+
+    st.dataframe(
+        detail_table.style.format(
+            formatting,
+            na_rep="-",
+        ),
+        use_container_width=True,
+        hide_index=True,
+        height=650,
+    )
+
+    csv_data = detail_table.to_csv(
+        index=False,
+    ).encode("utf-8-sig")
+
+    st.download_button(
+        "Download P&L Analysis CSV",
+        data=csv_data,
+        file_name="pnl_analysis.csv",
+        mime="text/csv",
+    )
+
+warehouse_profit = st.session_state["warehouse_profit"].copy()
+
+customer_cost_raw = (
+    st.session_state["customer_cost_raw"]
+    .copy()
+)
+
+customer_income_raw = (
+    st.session_state["customer_income_raw"]
+    .copy()
+)
+
+warehouse_cost = st.session_state["dataset_cost"].copy()
+
+from io import BytesIO
+import zipfile
+
+warehouse_mapping = {
+    "LAX1": "C0000000578",
+    "LAX2": "C0000000579",
+    "LAX4": "C0000008149",
+    "LAX5": "C0000009307",
+}
+
+
+def to_excel(df):
+    output = BytesIO()
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False)
+
+    output.seek(0)
+    return output.getvalue()
+
+
+zip_buffer = BytesIO()
+
+with zipfile.ZipFile(
+    zip_buffer,
+    "w",
+    zipfile.ZIP_DEFLATED,
+) as zf:
+
+    for warehouse_name, warehouse_code in warehouse_mapping.items():
+
+        # Warehouse P&L
+        df = warehouse_profit[
+            warehouse_profit["仓编码"] == warehouse_code
+        ]
+
+        zf.writestr(
+            f"{warehouse_name}_Warehouse_P&L.xlsx",
+            to_excel(df),
+        )
+
+        # Customer P&L
+        df = customer_cost_raw[
+            customer_cost_raw["仓编码"] == warehouse_code
+        ]
+
+        zf.writestr(
+            f"{warehouse_name}_Customer_Cost.xlsx",
+            to_excel(df),
+        )
+
+        df = customer_income_raw[
+                customer_income_raw["仓编码"] == warehouse_code
+            ]
+        
+        zf.writestr(
+            f"{warehouse_name}_Customer_Income.xlsx",
+            to_excel(df),
+        )
+
+        # Operation Cost
+        warehouse_mapping = {
+        "美国洛杉矶大件1号仓": "C0000000578",
+        "美国洛杉矶中小件2号仓": "C0000000579",
+        "美国洛杉矶中小件4号仓": "C0000008149",
+        "美国洛杉矶大件5号仓": "C0000009307",
+    }
+        operation_cost = st.session_state["operation_cost"].copy()
+        operation_cost['warehouse_name'] = operation_cost['部门段_EBS'].str.split('-', n=3).str[3]
+        operation_cost= operation_cost[operation_cost['warehouse_name'].isin(['美国洛杉矶中小件2号仓', '美国洛杉矶大件1号仓', '美国洛杉矶中小件4号仓', '美国洛杉矶大件5号仓'])].copy()
+
+        operation_cost["warehouse_code"] = (
+            operation_cost["warehouse_name"]
+            .map(warehouse_mapping)
+        )
+
+        df = operation_cost[
+            operation_cost["warehouse_code"] == warehouse_code
+        ]
+
+        zf.writestr(
+            f"{warehouse_name}_Operation_Cost.xlsx",
+            to_excel(df),
+        )
+
+zip_buffer.seek(0)
+
+st.download_button(
+    "Download Warehouse Files",
+    data=zip_buffer,
+    file_name="Warehouse_Source_Data.zip",
+    mime="application/zip",
+    type="primary",
+)
+st.stop()
