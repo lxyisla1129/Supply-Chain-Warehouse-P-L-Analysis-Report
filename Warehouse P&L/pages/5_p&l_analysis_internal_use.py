@@ -2380,10 +2380,10 @@ with zipfile.ZipFile(
 zip_buffer.seek(0)
 
 st.download_button(
-    "Download Warehouse Files",
-    data=zip_buffer,
-    file_name="Warehouse_Source_Data.zip",
-    mime="application/zip",
-    type="primary",
+    "Download P&L Analysis CSV",
+    data=csv_data,
+    file_name="pnl_analysis.csv",
+    mime="text/csv",
+    key="download_pnl_analysis_csv"
 )
 st.stop()
